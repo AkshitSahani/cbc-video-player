@@ -1,37 +1,37 @@
-document.addEventListener("DOMContentLoaded", function() {
-    // this function runs when the DOM is ready, i.e. when the document has been parsed
-    // document.getElementById("user-greeting").textContent = "Welcome back, Bart";
-  });
-    // let myVideo = document.getElementById("video1");
     const regex = /^\d+$/;
-    // let width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-    // let height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+    let currentVideoId;
+    let activeTab = 'Normal';
 
-    var w=window,
-    d=document,
-    e=d.documentElement,
-    g=d.getElementsByTagName('body')[0],
-    x=w.innerWidth||e.clientWidth||g.clientWidth,
-    y=w.innerHeight||e.clientHeight||g.clientHeight;
-    // const {width, height} = document.get('window');
-    // console.log(width, height);
-    // let desc = document.getElementsByClassName('description')[0];
-    //
-    // let videoSrc = document.getElementById("vidSrc");
-    //
-    // let videoTitle = document.getElementsByClassName('title')[0];
-    // console.log('videoTitle', videoTitle, videoSrc)
+    adjustVideo = () => {
+      let video = document.querySelector('.video');
+      if(video){
+        if(window.innerWidth < 700 &&  window.innerWidth > 500){
+          setActiveTab(document.getElementsByClassName('btn')[2]);
+          video.width = 500;
+        }
+        else if(window.innerWidth < 500){
+          setActiveTab(document.getElementsByClassName('btn')[1]);
+          video.width = 300;
+        }
+      }
+    }
+
+    window.addEventListener('resize', adjustVideo);
+
     const fetchVideo = async (id) => {
       try{
+
+        toggleLoader();
         console.log('inside fetch video function!!!')
         const response = await fetch(`https://www.cbc.ca/bistro/order?mediaId=${id}`);
         const myJson = await response.json(); //extract JSON from the http response
-        // do something with myJson
         console.log('JSON resposne', myJson);
+        toggleLoader();
         if(myJson.errors.length){
-          createError('The id provided does not have a video associated with it! Please try again', 'search');
+          createError('the id provided does not have a video associated with it! Please try again', 'search');
         }
         else{
+          currentVideoId = id;
           removeError();
           const {assetDescriptors, title, thumbnail, description, } = myJson.items[0];
           console.log(assetDescriptors, title, thumbnail, description);
@@ -45,20 +45,23 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     onKeyPress = () => {
-      let userInput = document.getElementsByTagName('input')[0].value;
+      let userInput = document.querySelector('input').value.trim();
       console.log('key pressed!!!', userInput);
-      let submitButton = document.getElementsByClassName('submit')[0];
+      let submitButton = document.querySelector('.submit');
       userInput !== '' ? submitButton.disabled = false : submitButton.disabled = true;
     }
 
     onSubmit = () => {
-      let userInput = document.getElementsByTagName('input')[0].value;
+      let userInput = document.querySelector('input').value.trim();
       console.log('videoID', userInput);
+      if(userInput === currentVideoId){
+        return createError('this video is already being watched!', 'search')
+      }
       if(regex.test(userInput)){
         removeError();
         return fetchVideo(userInput);
       }
-      createError('Video Ids can only be numbers. Please try again!', 'search');
+      createError('video Ids can only be numbers! Please try again', 'search');
     }
 
     renderCourtesy = () => {
@@ -75,6 +78,7 @@ document.addEventListener("DOMContentLoaded", function() {
       link.href = url;
       link.target = "_blank";
       link.innerHTML = text;
+      link.className = 'link';
       return link;
     }
 
@@ -97,14 +101,25 @@ document.addEventListener("DOMContentLoaded", function() {
       video.className = 'video';
       video.autoplay = true;
       video.width = 500;
+      video.onclick = () => !document.fullscreenElement ? toggleVideo(video) : null;
       let source = document.createElement('source');
       source.setAttribute('src', url);
       video.appendChild(source);
       return video;
     }
 
+    toggleVideo = (video) => {
+      let pausePlay = document.querySelector('.pause-play');
+      if(video.paused){
+        video.play();
+        return pausePlay.innerHTML = 'Pause'
+      }
+      video.pause();
+      pausePlay.innerHTML = 'Play'
+    }
+
     createButtons = (video) => {
-      let text = ['Play/Pause', 'Small', 'Normal', 'Big', 'Full Screen'];
+      let text = ['Pause', 'Small', 'Normal', 'Big', 'Full Screen'];
       let videoDimensions = [0, 300, 500, 700]; //0th element doesnt matter
 
       let buttonsContainer = document.createElement('div');
@@ -114,29 +129,21 @@ document.addEventListener("DOMContentLoaded", function() {
         let button = document.createElement('button');
         button.className = 'btn';
         if(i === 0){
-          button.onclick = () => video.paused ? video.play() : video.pause();
+          button.classList.add('pause-play');
+          button.onclick = () => toggleVideo(video);
         }
         else if(i > 3){
-          button.onclick = () => {
-            video.width = x;
-            // video.width = width;
-            video.height = y;
-            // video.height = height;
-            if (video.requestFullscreen) {
-              video.requestFullscreen();
-            }
-            //  else if (video.msRequestFullscreen) {
-            //   video.msRequestFullscreen();
-            // } else if (video.mozRequestFullScreen) {
-            //   video.mozRequestFullScreen();
-            // } else if (video.webkitRequestFullscreen) {
-            //   video.webkitRequestFullscreen();
-            // }
-          }
+          button.onclick = () => video.requestFullscreen ? video.requestFullscreen() : null;
         }
         else{
           let width = videoDimensions[i];
-          button.onclick = () => video.width = width;
+          if(i === 2){
+            button.classList.add('active-tab');
+          }
+          button.onclick = () => {
+            video.width = width;
+            setActiveTab(button);
+          }
         }
         button.innerHTML = text[i];
         buttonsContainer.appendChild(button);
@@ -144,47 +151,46 @@ document.addEventListener("DOMContentLoaded", function() {
       return buttonsContainer;
     }
 
+    setActiveTab = (button) => {
+      let currentlyActive = document.querySelector('.active-tab');
+      currentlyActive.classList.remove('active-tab');
+      button.classList.add('active-tab');
+    }
+
     renderVideo = (url, title, img, desc) => {
-      let existingContainer = document.getElementsByClassName('vid-container');
-      existingContainer.length ? existingContainer[0].parentNode.removeChild(existingContainer[0]) : null;
+      let existingContainer = document.querySelector('.vid-container');
+      existingContainer ? existingContainer.parentNode.removeChild(existingContainer) : null;
 
       let container = document.createElement('div');
       container.className = 'vid-container';
       let video = createVideo(url);
       let buttons = createButtons(video);
-      // for(var i = 0; i < 4; i++){
-      //   let button = document.createElement('button');
-      //   if(i === 0){
-      //     button.onclick = () => video.paused ? video.play() : video.pause();
-      //   }
-      //   else{
-      //     let width = videoDimensions[i];
-      //     button.onclick = () => video.width = width;
-      //   }
-      //   button.className = 'btn';
-      //   button.innerHTML = text[i];
-      //   buttonsContainer.appendChild(button);
-      // }
       container.appendChild(renderTitle(title))
       container.appendChild(buttons);
       container.appendChild(video);
       container.appendChild(renderDescription(desc));
       container.appendChild(renderCourtesy());
-      document.getElementsByTagName('body')[0].appendChild(container);
+      document.querySelector('body').appendChild(container);
     }
 
     createError = (message, appendTo) => {
       removeError();
       let error = document.createElement('p');
       error.className = 'error';
-      let errorText = document.createTextNode(message);
+      let errorText = document.createTextNode(`Oops, ${message}`);
       error.appendChild(errorText);
-      document.getElementsByClassName(appendTo)[0].appendChild(error);
+      document.querySelector(`.${appendTo}`).appendChild(error);
     }
 
     removeError = () => {
-      let error = document.getElementsByClassName('error')[0];
+      let error = document.querySelector('.error');
       error ? error.parentNode.removeChild(error) : null;
     }
 
-// });
+    toggleLoader = () => {
+      console.log('in toggleLoader function');
+      let loader = document.querySelector('.loader');
+      console.log('loader', loader,);
+      loader.classList.toggle('hidden');
+      // loader.style.display === 'none' ? loader.style.display = 'flex' : loader.style.display = 'none';
+    }
