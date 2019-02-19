@@ -18,9 +18,11 @@ To run the projects locally:
 
 - open bonus.html to view the bonus (HLS Stream) project in your browser.
 
+- To view a video, simply provide the id of the video in the search bar and click on "Submit". 
+
 IMPORTANT: 
 - index.php file was only included for deployment purposes. (It simply serves the html file).
 - All testing was done on Chrome and Firefox browsers. Please run the locally downloaded files on one of these browsers.
 
 
-- To view a video, simply provide the id of the video in the search bar and click on "Submit". 
+
