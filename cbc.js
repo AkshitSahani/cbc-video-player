@@ -3,7 +3,7 @@
     let activeTab = 'Normal';
 
     adjustVideo = () => {
-      let video = document.querySelector('.video');
+      let video = document.querySelector('#video');
       if(video){
         if(window.innerWidth < 700 &&  window.innerWidth > 500){
           setActiveTab(document.getElementsByClassName('btn')[2]);
@@ -22,10 +22,10 @@
       try{
 
         toggleLoader();
-        console.log('inside fetch video function!!!')
+        // console.log('inside fetch video function!!!')
         const response = await fetch(`https://www.cbc.ca/bistro/order?mediaId=${id}`);
         const myJson = await response.json(); //extract JSON from the http response
-        console.log('JSON resposne', myJson);
+        // console.log('JSON resposne', myJson);
         toggleLoader();
         if(myJson.errors.length){
           createError('the id provided does not have a video associated with it! Please try again', 'search');
@@ -53,7 +53,7 @@
 
     onSubmit = () => {
       let userInput = document.querySelector('input').value.trim();
-      console.log('videoID', userInput);
+      // console.log('videoID', userInput);
       if(userInput === currentVideoId){
         return createError('this video is already being watched!', 'search')
       }
@@ -98,10 +98,10 @@
 
     createVideo = (url) => {
       let video = document.createElement('video');
-      video.className = 'video';
+      video.id = 'video';
       video.autoplay = true;
+      video.setAttribute('controls', true);
       video.width = 500;
-      video.onclick = () => !document.fullscreenElement ? toggleVideo(video) : null;
       let source = document.createElement('source');
       source.setAttribute('src', url);
       video.appendChild(source);
@@ -188,9 +188,8 @@
     }
 
     toggleLoader = () => {
-      console.log('in toggleLoader function');
+      // console.log('in toggleLoader function');
       let loader = document.querySelector('.loader');
-      console.log('loader', loader,);
+      // console.log('loader', loader,);
       loader.classList.toggle('hidden');
-      // loader.style.display === 'none' ? loader.style.display = 'flex' : loader.style.display = 'none';
     }

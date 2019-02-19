@@ -105,3 +105,15 @@ button:disabled, button:disabled:hover{
 .link {
   color: #E60505;
 }
+
+.hls{
+  height: 91vh;
+  /* justify-content: flex-start; */
+}
+
+.hls-container{
+  display: flex;
+  flex:1;
+  justify-content: center;
+  align-items: center;
+}
