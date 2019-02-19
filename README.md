@@ -10,7 +10,7 @@ Please visit the urls provided above if you do not want to download the files lo
 To run the projects locally:
 
 - clone this repository locally (by running "git clone https://github.com/AkshitSahani/cbc-video-player.git" on your local machine).
-   ** This presumes you have git on your local machine. If you don't, instructions are available at https://git-scm.com/book/en/v2/Getting-Started-Installing-Git.
+   ** This presumes that you already have git on your local machine. If you don't, instructions are available at https://git-scm.com/book/en/v2/Getting-Started-Installing-Git.
 
 - cd into the cloned folder. 
 
